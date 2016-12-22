@@ -8,11 +8,20 @@
  * | Copyright (c) 2012-2019, www.houdunwang.com. All Rights Reserved.
  * '-------------------------------------------------------------------*/
 namespace houdunwang\request;
+
 //请求处理
+use houdunwang\arr\Arr;
+use houdunwang\cookie\Cookie;
+use houdunwang\session\Session;
+
 class Request {
 	static $items = [ ];
 
-	public function __construct() {
+	private function __construct() {
+	}
+
+	//启动组件
+	public static function bootstrap() {
 		if ( PHP_SAPI != 'cli' ) {
 			defined( 'IS_GET' ) or define( 'IS_GET', $_SERVER['REQUEST_METHOD'] == 'GET' );
 			defined( 'IS_POST' ) or define( 'IS_POST', $_SERVER['REQUEST_METHOD'] == 'POST' );
@@ -23,17 +32,13 @@ class Request {
 			defined( '__URL__' ) or define( '__URL__', trim( 'http://' . $_SERVER['HTTP_HOST'] . '/' . trim( $_SERVER['REQUEST_URI'], '/\\' ), '/' ) );
 			defined( '__HISTORY__' ) or define( "__HISTORY__", isset( $_SERVER["HTTP_REFERER"] ) ? $_SERVER["HTTP_REFERER"] : '' );
 		}
-	}
-
-	//启动组件
-	public function bootstrap() {
 		self::$items['GET']     = $_GET;
 		self::$items['POST']    = $_POST;
 		self::$items['REQUEST'] = $_REQUEST;
 		self::$items['SERVER']  = $_SERVER;
 		self::$items['GLOBALS'] = $GLOBALS;
-		self::$items['SESSION'] = Session::all();
-		self::$items['COOKIE']  = Cookie::all();
+		self::$items['SESSION'] = ( new Session() )->all();
+		self::$items['COOKIE']  = ( new Cookie() )->all();
 	}
 
 	/**
@@ -45,11 +50,11 @@ class Request {
 	 *
 	 * @return null
 	 */
-	public function query( $name, $value = null, $method = [ ] ) {
+	public static function query( $name, $value = null, $method = [ ] ) {
 		$exp    = explode( '.', $name );
 		$action = array_shift( $exp );
 
-		return $this->__call( $action, [ implode( '.', $exp ), $value, $method ] );
+		return self::__callStatic( $action, [ implode( '.', $exp ), $value, $method ] );
 	}
 
 	/**
@@ -60,7 +65,7 @@ class Request {
 	 *
 	 * @return bool
 	 */
-	public function set( $name, $value ) {
+	public static function set( $name, $value ) {
 		$info   = explode( '.', $name );
 		$action = strtoupper( array_shift( $info ) );
 		if ( isset( self::$items[ $action ] ) ) {
@@ -84,7 +89,7 @@ class Request {
 	 *
 	 * @return mixed
 	 */
-	public function __call( $action, $arguments ) {
+	public function __callStatic( $action, $arguments ) {
 		$action = strtoupper( $action );
 		if ( empty( $arguments ) ) {
 			return self::$items[ $action ];
@@ -98,7 +103,7 @@ class Request {
 	}
 
 	//客户端IP
-	public function ip( $type = 0 ) {
+	public static function ip( $type = 0 ) {
 		$type = intval( $type );
 		//保存客户端IP地址
 		if ( isset( $_SERVER ) ) {
@@ -129,7 +134,7 @@ class Request {
 	}
 
 	//判断请求来源是否为本网站域名
-	public function isDomain() {
+	public static function isDomain() {
 		if ( isset( $_SERVER['HTTP_REFERER'] ) ) {
 			$referer = parse_url( $_SERVER['HTTP_REFERER'] );
 			$root    = parse_url( __ROOT__ );
@@ -139,7 +144,7 @@ class Request {
 	}
 
 	//https请求
-	public function isHttps() {
+	public static function isHttps() {
 		if ( isset( $_SERVER['HTTPS'] ) && ( '1' == $_SERVER['HTTPS'] || 'on' == strtolower( $_SERVER['HTTPS'] ) ) ) {
 			return true;
 		} elseif ( isset( $_SERVER['SERVER_PORT'] ) && ( '443' == $_SERVER['SERVER_PORT'] ) ) {
@@ -150,14 +155,14 @@ class Request {
 	}
 
 	//微信客户端检测
-	public function isWeChat() {
+	public static function isWeChat() {
 		return isset( $_SERVER['HTTP_USER_AGENT'] ) && strpos( $_SERVER['HTTP_USER_AGENT'], 'MicroMessenger' ) !== false;
 	}
 
 	//手机客户端判断
-	public function isMobile() {
+	public static function isMobile() {
 		//微信客户端检测
-		if ( $this->isWeChat() ) {
+		if ( self::isWeChat() ) {
 			return true;
 		}
 		if ( ! empty( $_GET['_mobile'] ) ) {
