@@ -13,9 +13,6 @@ namespace houdunwang\request;
 use houdunwang\request\build\Base;
 
 class Request {
-	public function __construct() {
-	}
-
 	protected static function link() {
 		static $link = null;
 		if ( is_null( $link ) ) {
@@ -30,6 +27,6 @@ class Request {
 	}
 
 	public static function __callStatic( $name, $arguments ) {
-		return call_user_func_array( [ static::link(), $name ], $arguments );
+		return call_user_func_array( [ self::link(), $name ], $arguments );
 	}
 }
