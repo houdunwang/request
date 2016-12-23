@@ -3,7 +3,7 @@
 ##介绍
 Request服务是用于获取请求数据与对请求终端设备进行判断的服务。 
 
-> 使用Request 组件前必须先行配置 Session组件与Cookie组件,请参考GitHub文档进行参考
+> 使用 Request 组件前必须先行配置 [Session组件](https://github.com/houdunwang/session) 与 [Cookie组件](https://github.com/houdunwang/cookie),请参考GitHub文档进行参考
 
 [TOC]
 
