@@ -18,6 +18,7 @@ class Base {
 	protected $items = [ ];
 
 	public function __construct() {
+
 	}
 
 	//启动组件
@@ -32,13 +33,13 @@ class Base {
 			defined( '__URL__' ) or define( '__URL__', trim( 'http://' . $_SERVER['HTTP_HOST'] . '/' . trim( $_SERVER['REQUEST_URI'], '/\\' ), '/' ) );
 			defined( '__HISTORY__' ) or define( "__HISTORY__", isset( $_SERVER["HTTP_REFERER"] ) ? $_SERVER["HTTP_REFERER"] : '' );
 		}
-		self::$items['GET']     = $_GET;
-		self::$items['POST']    = $_POST;
-		self::$items['REQUEST'] = $_REQUEST;
-		self::$items['SERVER']  = $_SERVER;
-		self::$items['GLOBALS'] = $GLOBALS;
-		self::$items['SESSION'] = ( new Session() )->all();
-		self::$items['COOKIE']  = ( new Cookie() )->all();
+		$this->items['GET']     = $_GET;
+		$this->items['POST']    = $_POST;
+		$this->items['REQUEST'] = $_REQUEST;
+		$this->items['SERVER']  = $_SERVER;
+		$this->items['GLOBALS'] = $GLOBALS;
+		$this->items['SESSION'] = Session::all();
+		$this->items['COOKIE']  = Cookie::all();
 	}
 
 	/**
@@ -68,8 +69,8 @@ class Base {
 	public function set( $name, $value ) {
 		$info   = explode( '.', $name );
 		$action = strtoupper( array_shift( $info ) );
-		if ( isset( self::$items[ $action ] ) ) {
-			self::$items[ $action ] = Arr::set( self::$items[ $action ], implode( '.', $info ), $value );
+		if ( isset( $this->items[ $action ] ) ) {
+			$this->items[ $action ] = Arr::set( $this->items[ $action ], implode( '.', $info ), $value );
 
 			return true;
 		}
@@ -92,9 +93,9 @@ class Base {
 	public function __call( $action, $arguments ) {
 		$action = strtoupper( $action );
 		if ( empty( $arguments ) ) {
-			return self::$items[ $action ];
+			return $this->items[ $action ];
 		}
-		$data = Arr::get( self::$items[ $action ], $arguments[0] );
+		$data = Arr::get( $this->items[ $action ], $arguments[0] );
 		if ( ! is_null( $data ) && ! empty( $arguments[2] ) ) {
 			return Tool::batchFunctions( $arguments[2], $data );
 		}
