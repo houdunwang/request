@@ -100,7 +100,7 @@ class Base {
 			return Tool::batchFunctions( $arguments[2], $data );
 		}
 
-		return is_null( $data ) ? $arguments[1] : $data;
+		return $data ?: ( empty( $arguments[1] ) ? null : $arguments[1] );
 	}
 
 	//客户端IP
