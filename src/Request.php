@@ -13,20 +13,28 @@ namespace houdunwang\request;
 use houdunwang\request\build\Base;
 
 class Request {
-	protected static function link() {
-		static $link = null;
-		if ( is_null( $link ) ) {
-			$link = new Base();
-		}
+	protected $link;
 
-		return $link;
+	protected function driver() {
+		$this->link = new Base();
+
+		return $this;
 	}
 
 	public function __call( $method, $params ) {
-		return call_user_func_array( [ self::link(), $method ], $params );
+		if ( is_null( $this->link ) ) {
+			$this->driver();
+		}
+
+		return call_user_func_array( [ $this->link, $method ], $params );
 	}
 
 	public static function __callStatic( $name, $arguments ) {
-		return call_user_func_array( [ self::link(), $name ], $arguments );
+		static $link;
+		if ( is_null( $link ) ) {
+			$link = new static();
+		}
+
+		return call_user_func_array( [ $link, $name ], $arguments );
 	}
 }
