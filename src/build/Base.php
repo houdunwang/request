@@ -24,6 +24,11 @@ class Base {
 	//启动组件
 	public function bootstrap() {
 		if ( PHP_SAPI != 'cli' ) {
+			//post数据解析
+			if ( empty( $_POST ) ) {
+				parse_str( file_get_contents( 'php://input' ), $_POST );
+			}
+			defined( 'NOW' ) or define( 'NOW', $_SERVER['REQUEST_TIME'] );
 			defined( 'IS_GET' ) or define( 'IS_GET', $_SERVER['REQUEST_METHOD'] == 'GET' );
 			defined( 'IS_POST' ) or define( 'IS_POST', $_SERVER['REQUEST_METHOD'] == 'POST' );
 			defined( 'IS_DELETE' ) or define( 'IS_DELETE', $_SERVER['REQUEST_METHOD'] == 'DELETE' ? true : ( isset( $_POST['_method'] ) && $_POST['_method'] == 'DELETE' ) );

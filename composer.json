@@ -28,7 +28,9 @@
     "houdunwang/tool": "~1.0"
   },
   "autoload": {
-    "files": [],
+    "files": [
+      "src/helper.php"
+    ],
     "psr-4": {
       "houdunwang\\request\\": "src"
     }
