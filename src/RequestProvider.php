@@ -9,19 +9,18 @@
  * '-------------------------------------------------------------------*/
 namespace houdunwang\request;
 
-use hdphp\kernel\ServiceProvider;
+use houdunwang\framework\build\Provider;
 
-class RequestProvider extends ServiceProvider {
+class RequestProvider extends Provider {
 	//延迟加载
 	public $defer = true;
 
 	public function boot() {
-		define( 'IS_MOBILE', \Request::isMobile() );
 	}
 
 	public function register() {
-		$this->app->single( 'Request', function ( $app ) {
-			return new Request( $app );
+		$this->app->single( 'Request', function () {
+			return new Request();
 		} );
 	}
 }

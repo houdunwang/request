@@ -23,7 +23,8 @@ class Base {
 
 	//启动组件
 	public function bootstrap() {
-		if ( PHP_SAPI != 'cli' ) {
+		defined( 'IS_CLI' ) or define( 'IS_CLI', PHP_SAPI == 'cli' );
+		if ( ! IS_CLI ) {
 			//post数据解析
 			if ( empty( $_POST ) ) {
 				parse_str( file_get_contents( 'php://input' ), $_POST );
@@ -35,6 +36,7 @@ class Base {
 			defined( 'IS_PUT' ) or define( 'IS_PUT', $_SERVER['REQUEST_METHOD'] == 'PUT' ? true : ( isset( $_POST['_method'] ) && $_POST['_method'] == 'PUT' ) );
 			defined( 'IS_AJAX' ) or define( 'IS_AJAX', isset( $_SERVER['HTTP_X_REQUESTED_WITH'] ) && strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) == 'xmlhttprequest' );
 			defined( 'IS_WECHAT' ) or define( 'IS_WECHAT', isset( $_SERVER['HTTP_USER_AGENT'] ) && strpos( $_SERVER['HTTP_USER_AGENT'], 'MicroMessenger' ) !== false );
+			defined( 'IS_MOBILE' ) or define( 'IS_MOBILE', $this->isMobile() );
 			defined( '__URL__' ) or define( '__URL__', trim( 'http://' . $_SERVER['HTTP_HOST'] . '/' . trim( $_SERVER['REQUEST_URI'], '/\\' ), '/' ) );
 			defined( '__HISTORY__' ) or define( "__HISTORY__", isset( $_SERVER["HTTP_REFERER"] ) ? $_SERVER["HTTP_REFERER"] : '' );
 		}
