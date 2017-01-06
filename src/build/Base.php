@@ -60,6 +60,9 @@ class Base {
 	 */
 	public function query( $name, $value = null, $method = [ ] ) {
 		$exp    = explode( '.', $name );
+		if(count($exp)==1){
+			array_unshift($exp,'request');
+		}
 		$action = array_shift( $exp );
 
 		return $this->__call( $action, [ implode( '.', $exp ), $value, $method ] );
@@ -149,6 +152,7 @@ class Base {
 
 			return $referer['host'] == $root['host'];
 		}
+		return false;
 	}
 
 	//https请求
