@@ -11,17 +11,33 @@
 namespace houdunwang\request\build;
 
 //请求处理
-use Arr;
-use Cookie;
-use Session;
+use houdunwang\arr\Arr;
+use houdunwang\cookie\Cookie;
+use houdunwang\session\Session;
+use houdunwang\tool\Tool;
 
 class Base
 {
     protected $items = [];
 
+    protected function init()
+    {
+        //命令行时定义默认值
+        if ( ! isset($_SERVER['REQUEST_METHOD'])) {
+            $_SERVER['REQUEST_METHOD'] = '';
+        }
+        if ( ! isset($_SERVER['HTTP_HOST'])) {
+            $_SERVER['HTTP_HOST'] = '';
+        }
+        if ( ! isset($_SERVER['REQUEST_URI'])) {
+            $_SERVER['REQUEST_URI'] = '';
+        }
+    }
+
     //启动组件
     public function bootstrap()
     {
+        $this->init();
         $_SERVER['SCRIPT_NAME'] = str_replace(
             '\\',
             '/',
@@ -275,6 +291,9 @@ class Base
         }
         if ( ! empty($_GET['_mobile'])) {
             return true;
+        }
+        if ( ! isset($_SERVER['HTTP_USER_AGENT'])) {
+            return false;
         }
         $_SERVER['ALL_HTTP'] = isset($_SERVER['ALL_HTTP'])
             ? $_SERVER['ALL_HTTP'] : '';
