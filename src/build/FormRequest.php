@@ -18,7 +18,10 @@ namespace houdunwang\request\build;
  */
 abstract class FormRequest implements \ArrayAccess
 {
-    //验证失败时的跳转页面
+    /**
+     * 验证失败时的跳转页面
+     * @var string
+     */
     protected $home = '/';
 
     /**
@@ -31,8 +34,14 @@ abstract class FormRequest implements \ArrayAccess
      */
     abstract public function rules();
 
+    /**
+     * @var array
+     */
     protected $data = [];
 
+    /**
+     * FormRequest constructor.
+     */
     public function __construct()
     {
         if ($this->authorize() !== true) {
@@ -42,6 +51,9 @@ abstract class FormRequest implements \ArrayAccess
         $this->validate();
     }
 
+    /**
+     *
+     */
     final private function validate()
     {
         if ( ! empty($this->data)) {
@@ -49,34 +61,62 @@ abstract class FormRequest implements \ArrayAccess
         }
     }
 
+    /**
+     * @param mixed $key
+     * @param mixed $value
+     */
     public function offsetSet($key, $value)
     {
     }
 
+    /**
+     * @param mixed $key
+     *
+     * @return mixed|null
+     */
     public function offsetGet($key)
     {
         return isset($this->data[$key]) ? $this->data[$key] : null;
     }
 
+    /**
+     * @param mixed $key
+     *
+     * @return bool
+     */
     public function offsetExists($key)
     {
         return isset($this->data[$key]);
     }
 
+    /**
+     * @param mixed $key
+     */
     public function offsetUnset($key)
     {
     }
 
+    /**
+     * @param $name
+     *
+     * @return mixed|null
+     */
     public function __get($name)
     {
         return isset($this[$name]) ? $this[$name] : null;
     }
 
+    /**
+     * @return array
+     */
     public function all()
     {
         return $this->data;
     }
 
+    /**
+     * @return array
+     */
     public function __invoke()
     {
         return $this->all();

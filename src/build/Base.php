@@ -10,12 +10,17 @@
 
 namespace houdunwang\request\build;
 
-//请求处理
 use houdunwang\arr\Arr;
 use houdunwang\cookie\Cookie;
 use houdunwang\session\Session;
 use houdunwang\tool\Tool;
 
+/**
+ * 请求管理
+ * Class Base
+ *
+ * @package houdunwang\request\build
+ */
 class Base
 {
     protected $items = [];
@@ -34,7 +39,10 @@ class Base
         }
     }
 
-    //启动组件
+
+    /**
+     * 启动组件
+     */
     public function bootstrap()
     {
         $this->init();
@@ -250,9 +258,8 @@ class Base
     {
         if (isset($_SERVER['HTTP_REFERER'])) {
             $referer = parse_url($_SERVER['HTTP_REFERER']);
-            $root    = parse_url(__ROOT__);
 
-            return $referer['host'] == $root['host'];
+            return $referer['host'] == $_SERVER['HTTP_HOST'];
         }
 
         return false;
