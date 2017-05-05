@@ -25,8 +25,12 @@ class Base
 {
     protected $items = [];
 
-    protected function init()
+    /**
+     * 启动组件
+     */
+    public function bootstrap()
     {
+        $_SERVER['SCRIPT_NAME'] = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         //命令行时定义默认值
         if ( ! isset($_SERVER['REQUEST_METHOD'])) {
             $_SERVER['REQUEST_METHOD'] = '';
@@ -37,21 +41,26 @@ class Base
         if ( ! isset($_SERVER['REQUEST_URI'])) {
             $_SERVER['REQUEST_URI'] = '';
         }
+        if ( ! defined('NOW')) {
+            define('NOW', $_SERVER['REQUEST_TIME']);
+        }
+        if ( ! defined('MICROTIME')) {
+            define('MICROTIME', $_SERVER['REQUEST_TIME_FLOAT']);
+        }
+        if ( ! defined('__URL__')) {
+            define('__URL__', trim('http://'.$_SERVER['HTTP_HOST'].'/'.trim($_SERVER['REQUEST_URI'], '/\\'), '/'));
+        }
+        if ( ! defined('__HISTORY__')) {
+            define("__HISTORY__", isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : '');
+        }
+        $this->defineRequestConst();
     }
 
-
     /**
-     * 启动组件
+     * 定义请求常量
      */
-    public function bootstrap()
+    protected function defineRequestConst()
     {
-        $this->init();
-        $_SERVER['SCRIPT_NAME'] = str_replace(
-            '\\',
-            '/',
-            $_SERVER['SCRIPT_NAME']
-        );
-
         $this->items['POST']    = $_POST;
         $this->items['GET']     = $_GET;
         $this->items['REQUEST'] = $_REQUEST;
@@ -70,69 +79,48 @@ class Base
                 }
             }
         }
-        if ( ! defined('NOW')) {
-            define('NOW', $_SERVER['REQUEST_TIME']);
-        }
-        if ( ! defined('MICROTIME')) {
-            define('MICROTIME', $_SERVER['REQUEST_TIME_FLOAT']);
-        }
         if ( ! defined('IS_GET')) {
-            define('IS_GET', $_SERVER['REQUEST_METHOD'] == 'GET');
+            define('IS_GET', $this->isMethod('get'));
         }
         if ( ! defined('IS_POST')) {
-            define(
-                'IS_POST',
-                $_SERVER['REQUEST_METHOD'] == 'POST'
-                || ! empty($this->items['POST'])
-            );
+            define('IS_POST', $this->isMethod('post'));
         }
         if ( ! defined('IS_DELETE')) {
-            define(
-                'IS_DELETE',
-                $_SERVER['REQUEST_METHOD'] == 'DELETE'
-                    ?: (isset($_POST['_method'])
-                    && $_POST['_method'] == 'DELETE')
-            );
+            define('IS_DELETE', $this->isMethod('delete'));
         }
         if ( ! defined('IS_PUT')) {
-            define(
-                'IS_PUT',
-                $_SERVER['REQUEST_METHOD'] == 'PUT'
-                    ?:
-                    (isset($_POST['_method'])
-                        && $_POST['_method'] == 'PUT')
-            );
+            define('IS_PUT', $this->isMethod('put'));
         }
         if ( ! defined('IS_AJAX')) {
             define('IS_AJAX', $this->isAjax());
         }
         if ( ! defined('IS_WECHAT')) {
-            define(
-                'IS_WECHAT',
-                isset($_SERVER['HTTP_USER_AGENT'])
-                && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger')
-                !== false
-            );
+            define('IS_WECHAT', $this->isWeChat());
         }
         if ( ! defined('IS_MOBILE')) {
             define('IS_MOBILE', $this->isMobile());
         }
-        if ( ! defined('__URL__')) {
-            define(
-                '__URL__',
-                trim(
-                    'http://'.$_SERVER['HTTP_HOST'].'/'
-                    .trim($_SERVER['REQUEST_URI'], '/\\'),
-                    '/'
-                )
-            );
-        }
-        if ( ! defined('__HISTORY__')) {
-            define(
-                "__HISTORY__",
-                isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"]
-                    : ''
-            );
+    }
+
+    /**
+     * 判断请求类型
+     *
+     * @param $action
+     *
+     * @return bool
+     */
+    public function isMethod($action)
+    {
+        switch (strtoupper($action)) {
+            case 'GET':
+                return $_SERVER['REQUEST_METHOD'] == 'GET';
+            case 'POST':
+                return $_SERVER['REQUEST_METHOD'] == 'POST' || ! empty($this->items['POST']);
+            case 'DELETE':
+                return $_SERVER['REQUEST_METHOD'] == 'DELETE'
+                    ?: (isset($_POST['_method']) && $_POST['_method'] == 'DELETE');
+            case 'PUT':
+                return $_SERVER['REQUEST_METHOD'] == 'PUT' ?: (isset($_POST['_method']) && $_POST['_method'] == 'PUT');
         }
     }
 

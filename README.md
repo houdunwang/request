@@ -34,6 +34,11 @@ __URL__     当前请求完整URL
 __HISTORY__ 来源地址
 ```
 
+####判断请求类型
+```
+Request::isMethod('post');
+判断类型支持 get/post/delete/put类型的判断
+```
 ####获取数据
 query 方法支持点语法操作，支持多层数据获取。第一个字符为数据类型。
 ```

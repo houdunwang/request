@@ -21,4 +21,10 @@ class RequestTest extends TestCase
         Request::set("get.a", 'sina');
         $this->assertEquals('sina', Request::get('a'));
     }
+
+    public function test_is_method()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'GET';
+        $this->assertTrue(Request::isMethod('get'));
+    }
 }
