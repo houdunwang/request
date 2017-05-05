@@ -125,6 +125,22 @@ class Base
     }
 
     /**
+     * 获取请求的类型
+     * GET/POST/DELETE/PUT
+     *
+     * @return mixed
+     */
+    public function getRequestType()
+    {
+        $type = ['PUT', 'DELETE', 'POST', 'GET'];
+        foreach ($type as $t) {
+            if ($this->isMethod($t)) {
+                return $t;
+            }
+        }
+    }
+
+    /**
      * 是否为异步提交
      *
      * @return bool

@@ -27,4 +27,10 @@ class RequestTest extends TestCase
         $_SERVER['REQUEST_METHOD'] = 'GET';
         $this->assertTrue(Request::isMethod('get'));
     }
+
+    public function test_get_request_type()
+    {
+        $_SERVER['REQUEST_METHOD'] = 'DELETE';
+        $this->assertEquals('DELETE', Request::getRequestType());
+    }
 }
