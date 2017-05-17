@@ -1,7 +1,6 @@
 {
   "name": "houdunwang/request",
   "description": "客户端请求处理组件",
-  "type": "project",
   "keywords": [
     "houdunwang",
     "hdphp",
