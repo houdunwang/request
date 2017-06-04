@@ -68,15 +68,11 @@ class Base
         $this->items['GLOBALS'] = $GLOBALS;
         $this->items['SESSION'] = Session::all();
         $this->items['COOKIE']  = Cookie::all();
+
         if (empty($_POST)) {
             $input = file_get_contents('php://input');
             if ($data = json_decode($input, true)) {
                 $this->items['POST'] = $data;
-            } else {
-                parse_str($input, $post);
-                if ( ! empty($post)) {
-                    $this->items['POST'] = $post;
-                }
             }
         }
         if ( ! defined('IS_GET')) {
@@ -148,8 +144,8 @@ class Base
     public function isAjax()
     {
         return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-            && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])
-            == 'xmlhttprequest';
+               && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])
+                  == 'xmlhttprequest';
     }
 
     /**
@@ -215,6 +211,7 @@ class Base
         if (empty($arguments)) {
             return $this->items[$action];
         }
+
         $data = Arr::get($this->items[$action], $arguments[0]);
 
         if ( ! is_null($data) && ! empty($arguments[2])) {
@@ -278,7 +275,7 @@ class Base
         ) {
             return true;
         } elseif (isset($_SERVER['SERVER_PORT'])
-            && ('443' == $_SERVER['SERVER_PORT'])
+                  && ('443' == $_SERVER['SERVER_PORT'])
         ) {
             return true;
         }
@@ -290,7 +287,7 @@ class Base
     public function isWeChat()
     {
         return isset($_SERVER['HTTP_USER_AGENT'])
-            && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false;
+               && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false;
     }
 
     //手机客户端判断
@@ -317,9 +314,9 @@ class Base
         }
         if ((isset($_SERVER['HTTP_ACCEPT']))
             and (strpos(
-                    strtolower($_SERVER['HTTP_ACCEPT']),
-                    'application/vnd.wap.xhtml+xml'
-                ) !== false)
+                     strtolower($_SERVER['HTTP_ACCEPT']),
+                     'application/vnd.wap.xhtml+xml'
+                 ) !== false)
         ) {
             $mobile_browser++;
         }

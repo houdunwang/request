@@ -20,6 +20,7 @@ abstract class FormRequest implements \ArrayAccess
 {
     /**
      * 验证失败时的跳转页面
+     *
      * @var string
      */
     protected $home = '/';
@@ -52,7 +53,7 @@ abstract class FormRequest implements \ArrayAccess
     }
 
     /**
-     *
+     * 开始验证
      */
     final private function validate()
     {

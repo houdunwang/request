@@ -24,3 +24,31 @@ if ( ! function_exists('q')) {
         return \houdunwang\request\Request::query($var, $default, $methods);
     }
 }
+
+if ( ! function_exists('old')) {
+    /**
+     * 获取表单旧数据
+     *
+     * @param        $name    表单
+     * @param string $default 默认值
+     *
+     * @return string
+     */
+    function old($name, $default = '')
+    {
+        $data = \houdunwang\session\Session::flash('oldFormData');
+
+        return isset($data[$name]) ? $data[$name] : $default;
+    }
+}
+if ( ! function_exists('clientIp')) {
+    /**
+     * 客户端IP地址
+     *
+     * @return mixed
+     */
+    function clientIp()
+    {
+        return \houdunwang\request\Request::ip();
+    }
+}
