@@ -23,11 +23,8 @@ class RequestProvider extends Provider
 
     public function register()
     {
-        $this->app->single(
-            'Request',
-            function () {
-                return Request::single();
-            }
-        );
+        $this->app->single('Request', function () {
+            return Request::single();
+        });
     }
 }

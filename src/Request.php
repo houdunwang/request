@@ -17,31 +17,19 @@ class Request
 {
     protected static $link;
 
-    protected function driver()
-    {
-        self::$link = new Base();
-        self::$link->bootstrap();
-
-        return $this;
-    }
-
     public function __call($method, $params)
     {
-        if (is_null(self::$link)) {
-            $this->driver();
-        }
-
-        return call_user_func_array([self::$link, $method], $params);
+        return call_user_func_array([self::single(), $method], $params);
     }
 
     public static function single()
     {
-        static $link;
-        if (is_null($link)) {
-            $link = new static();
+        if (is_null(self::$link)) {
+            self::$link = new Base();
+            self::$link->bootstrap();
         }
 
-        return $link;
+        return self::$link;
     }
 
     public static function __callStatic($name, $arguments)
