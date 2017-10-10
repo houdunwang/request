@@ -7,7 +7,7 @@ if ( ! function_exists('request_url')) {
      */
     function request_url()
     {
-        return trim('http://'.$_SERVER['HTTP_HOST'].'/'.trim($_SERVER['REQUEST_URI'], '/\\'), '/');
+        return \houdunwang\request\Request::url();
     }
 }
 
@@ -19,7 +19,7 @@ if ( ! function_exists('history_url')) {
      */
     function history_url()
     {
-        return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : '';
+        return \houdunwang\request\Request::history();
     }
 }
 if ( ! function_exists('root_url')) {
@@ -30,7 +30,19 @@ if ( ! function_exists('root_url')) {
      */
     function root_url()
     {
-        return trim('http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']), '/\\');
+        return \houdunwang\request\Request::domain();
+    }
+}
+
+if ( ! function_exists('domain_url')) {
+    /**
+     * 网站根地址URI
+     *
+     * @return string
+     */
+    function domain_url()
+    {
+        return \houdunwang\request\Request::domain();
     }
 }
 
@@ -44,7 +56,7 @@ if ( ! function_exists('web_url')) {
      */
     function web_url()
     {
-        return Config::get('http.rewrite') ? root_url() : root_url().'/index.php';
+        return \houdunwang\request\Request::web();
     }
 }
 
@@ -90,5 +102,17 @@ if ( ! function_exists('clientIp')) {
     function clientIp()
     {
         return \houdunwang\request\Request::ip();
+    }
+}
+
+if ( ! function_exists('getallheaders')) {
+    /**
+     * 获取请求头信息
+     *
+     * @return mixed
+     */
+    function getallheaders()
+    {
+        return \houdunwang\request\Request::getallheaders();
     }
 }

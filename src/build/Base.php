@@ -14,6 +14,7 @@ use houdunwang\arr\Arr;
 use houdunwang\cookie\Cookie;
 use houdunwang\session\Session;
 use houdunwang\tool\Tool;
+use houdunwang\config\Config;
 
 /**
  * 请求管理
@@ -26,9 +27,10 @@ class Base
     protected $items = [];
 
     /**
-     * 启动组件
+     * 构造函数
+     * Base constructor.
      */
-    public function bootstrap()
+    public function __construct()
     {
         $_SERVER['SCRIPT_NAME'] = str_replace('\\', '/', $_SERVER['SCRIPT_NAME']);
         //命令行时定义默认值
@@ -41,19 +43,58 @@ class Base
         if ( ! isset($_SERVER['REQUEST_URI'])) {
             $_SERVER['REQUEST_URI'] = '';
         }
-        if ( ! defined('NOW')) {
-            define('NOW', $_SERVER['REQUEST_TIME']);
-        }
-        if ( ! defined('MICROTIME')) {
-            define('MICROTIME', $_SERVER['REQUEST_TIME_FLOAT']);
-        }
-        if ( ! defined('__URL__')) {
-            define('__URL__', trim('http://'.$_SERVER['HTTP_HOST'].'/'.trim($_SERVER['REQUEST_URI'], '/\\'), '/'));
-        }
-        if ( ! defined('__HISTORY__')) {
-            define("__HISTORY__", isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : '');
-        }
+        defined('NOW') or define('NOW', $_SERVER['REQUEST_TIME']);
+        defined('MICROTIME') or define('MICROTIME', $_SERVER['REQUEST_TIME_FLOAT']);
+        defined('__URL__') or define('__URL__', $this->url());
+        defined('__HISTORY__') or define("__HISTORY__", $this->history());
+        defined('__ROOT__') or define('__ROOT__', $this->domain());
+        defined('__WEB__') or define('__WEB__', $this->web());
+        define('DS', DIRECTORY_SEPARATOR);
         $this->defineRequestConst();
+    }
+
+    /**
+     * 当前链接地址
+     *
+     * @return string
+     */
+    public function url()
+    {
+        return trim('http://'.$_SERVER['HTTP_HOST'].'/'.trim($_SERVER['REQUEST_URI'], '/\\'), '/');
+    }
+
+    /**
+     * 网站域名
+     *
+     * @return string
+     */
+    public function domain()
+    {
+        return defined('RUN_MODE') && RUN_MODE != 'HTTP' ? ''
+            : trim('http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    }
+
+    /**
+     * 根据伪静态配置
+     * 添加带有入口文件的链接
+     *
+     * @return string
+     */
+    public function web()
+    {
+        $root = $this->domain();
+
+        return Config::get('http.rewrite') ? $root : $root.'/index.php';
+    }
+
+    /**
+     * 获取来源页
+     *
+     * @return string
+     */
+    public function history()
+    {
+        return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : '';
     }
 
     /**
@@ -75,27 +116,29 @@ class Base
                 $this->items['POST'] = $data;
             }
         }
-        if ( ! defined('IS_GET')) {
-            define('IS_GET', $this->isMethod('get'));
+        defined('IS_GET') or define('IS_GET', $this->isMethod('get'));
+        defined('IS_POST') or define('IS_POST', $this->isMethod('post'));
+        defined('IS_DELETE') or define('IS_DELETE', $this->isMethod('delete'));
+        defined('IS_PUT') or define('IS_PUT', $this->isMethod('put'));
+        defined('IS_AJAX') or define('IS_AJAX', $this->isAjax());
+        defined('IS_WECHAT') or define('IS_WECHAT', $this->isWeChat());
+        defined('IS_MOBILE') or define('IS_MOBILE', $this->isMobile());
+    }
+
+    /**
+     * 获取请求头信息
+     *
+     * @return mixed
+     */
+    public function getallheaders()
+    {
+        foreach ($_SERVER as $name => $value) {
+            if (substr($name, 0, 5) == 'HTTP_') {
+                $headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+            }
         }
-        if ( ! defined('IS_POST')) {
-            define('IS_POST', $this->isMethod('post'));
-        }
-        if ( ! defined('IS_DELETE')) {
-            define('IS_DELETE', $this->isMethod('delete'));
-        }
-        if ( ! defined('IS_PUT')) {
-            define('IS_PUT', $this->isMethod('put'));
-        }
-        if ( ! defined('IS_AJAX')) {
-            define('IS_AJAX', $this->isAjax());
-        }
-        if ( ! defined('IS_WECHAT')) {
-            define('IS_WECHAT', $this->isWeChat());
-        }
-        if ( ! defined('IS_MOBILE')) {
-            define('IS_MOBILE', $this->isMobile());
-        }
+
+        return $headers;
     }
 
     /**
@@ -116,7 +159,14 @@ class Base
                 return $_SERVER['REQUEST_METHOD'] == 'DELETE'
                     ?: (isset($_POST['_method']) && $_POST['_method'] == 'DELETE');
             case 'PUT':
-                return $_SERVER['REQUEST_METHOD'] == 'PUT' ?: (isset($_POST['_method']) && $_POST['_method'] == 'PUT');
+                return $_SERVER['REQUEST_METHOD'] == 'PUT'
+                    ?: (isset($_POST['_method']) && $_POST['_method'] == 'PUT');
+            case 'AJAX':
+                return $this->isAjax();
+            case 'wechat':
+                return $this->isWeChat();
+            case 'mobile':
+                return $this->isMobile();
         }
     }
 
@@ -143,9 +193,7 @@ class Base
      */
     public function isAjax()
     {
-        return isset($_SERVER['HTTP_X_REQUESTED_WITH'])
-               && strtolower($_SERVER['HTTP_X_REQUESTED_WITH'])
-                  == 'xmlhttprequest';
+        return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
     }
 
     /**
@@ -181,11 +229,7 @@ class Base
         $info   = explode('.', $name);
         $action = strtoupper(array_shift($info));
         if (isset($this->items[$action])) {
-            $this->items[$action] = Arr::set(
-                $this->items[$action],
-                implode('.', $info),
-                $value
-            );
+            $this->items[$action] = Arr::set($this->items[$action], implode('.', $info), $value);
 
             return true;
         }
@@ -218,8 +262,7 @@ class Base
             return Tool::batchFunctions($arguments[2], $data);
         }
 
-        return ! is_null($data) ? $data
-            : (isset($arguments[1]) ? $arguments[1] : null);
+        return ! is_null($data) ? $data : (isset($arguments[1]) ? $arguments[1] : null);
     }
 
     //客户端IP
@@ -271,12 +314,9 @@ class Base
     {
         if (isset($_SERVER['HTTPS'])
             && ('1' == $_SERVER['HTTPS']
-                || 'on' == strtolower($_SERVER['HTTPS']))
-        ) {
+                || 'on' == strtolower($_SERVER['HTTPS']))) {
             return true;
-        } elseif (isset($_SERVER['SERVER_PORT'])
-                  && ('443' == $_SERVER['SERVER_PORT'])
-        ) {
+        } elseif (isset($_SERVER['SERVER_PORT']) && ('443' == $_SERVER['SERVER_PORT'])) {
             return true;
         }
 
@@ -303,8 +343,7 @@ class Base
         if ( ! isset($_SERVER['HTTP_USER_AGENT'])) {
             return false;
         }
-        $_SERVER['ALL_HTTP'] = isset($_SERVER['ALL_HTTP'])
-            ? $_SERVER['ALL_HTTP'] : '';
+        $_SERVER['ALL_HTTP'] = isset($_SERVER['ALL_HTTP']) ? $_SERVER['ALL_HTTP'] : '';
         $mobile_browser      = '0';
         if (preg_match(
             '/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|iphone|ipad|ipod|android|xoom)/i',
@@ -312,12 +351,10 @@ class Base
         )) {
             $mobile_browser++;
         }
-        if ((isset($_SERVER['HTTP_ACCEPT']))
-            and (strpos(
-                     strtolower($_SERVER['HTTP_ACCEPT']),
-                     'application/vnd.wap.xhtml+xml'
-                 ) !== false)
-        ) {
+        if ((isset($_SERVER['HTTP_ACCEPT'])) and (strpos(
+                                                      strtolower($_SERVER['HTTP_ACCEPT']),
+                                                      'application/vnd.wap.xhtml+xml'
+                                                  ) !== false)) {
             $mobile_browser++;
         }
         if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {
@@ -422,15 +459,11 @@ class Base
             $mobile_browser++;
         }
         // Pre-final check to reset everything if the user is on Windows
-        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'windows')
-            !== false
-        ) {
+        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'windows') !== false) {
             $mobile_browser = 0;
         }
         // But WP7 is also Windows, with a slightly different characteristic
-        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'windows phone')
-            !== false
-        ) {
+        if (strpos(strtolower($_SERVER['HTTP_USER_AGENT']), 'windows phone') !== false) {
             $mobile_browser++;
         }
         if ($mobile_browser > 0) {
@@ -438,5 +471,19 @@ class Base
         } else {
             return false;
         }
+    }
+
+    /**
+     * 获取主机名
+     *
+     * @param string $url 链接地址
+     *
+     * @return string
+     */
+    public function getHost($url)
+    {
+        $arr = parse_url($url);
+
+        return isset($arr['host']) ? $arr['host'] : '';
     }
 }
