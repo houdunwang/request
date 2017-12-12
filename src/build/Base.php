@@ -265,7 +265,13 @@ class Base
         return ! is_null($data) ? $data : (isset($arguments[1]) ? $arguments[1] : null);
     }
 
-    //客户端IP
+    /**
+     * 客户端IP
+     *
+     * @param int $type
+     *
+     * @return mixed|string
+     */
     public function ip($type = 0)
     {
         $type = intval($type);
@@ -297,7 +303,11 @@ class Base
         return $clientIp[$type];
     }
 
-    //判断请求来源是否为本网站域名
+    /**
+     * 判断请求来源是否为本网站域名
+     *
+     * @return bool
+     */
     public function isDomain()
     {
         if (isset($_SERVER['HTTP_REFERER'])) {
@@ -309,12 +319,14 @@ class Base
         return false;
     }
 
-    //https请求
+    /**
+     * https请求
+     *
+     * @return bool
+     */
     public function isHttps()
     {
-        if (isset($_SERVER['HTTPS'])
-            && ('1' == $_SERVER['HTTPS']
-                || 'on' == strtolower($_SERVER['HTTPS']))) {
+        if (isset($_SERVER['HTTPS']) && ('1' == $_SERVER['HTTPS'] || 'on' == strtolower($_SERVER['HTTPS']))) {
             return true;
         } elseif (isset($_SERVER['SERVER_PORT']) && ('443' == $_SERVER['SERVER_PORT'])) {
             return true;
@@ -323,14 +335,21 @@ class Base
         return false;
     }
 
-    //微信客户端检测
+    /**
+     * 微信客户端检测
+     *
+     * @return bool
+     */
     public function isWeChat()
     {
-        return isset($_SERVER['HTTP_USER_AGENT'])
-               && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false;
+        return isset($_SERVER['HTTP_USER_AGENT']) && strpos($_SERVER['HTTP_USER_AGENT'], 'MicroMessenger') !== false;
     }
 
-    //手机客户端判断
+    /**
+     * 手机客户端判断
+     *
+     * @return bool
+     */
     public function isMobile()
     {
         //微信客户端检测
@@ -345,16 +364,10 @@ class Base
         }
         $_SERVER['ALL_HTTP'] = isset($_SERVER['ALL_HTTP']) ? $_SERVER['ALL_HTTP'] : '';
         $mobile_browser      = '0';
-        if (preg_match(
-            '/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|iphone|ipad|ipod|android|xoom)/i',
-            strtolower($_SERVER['HTTP_USER_AGENT'])
-        )) {
+        if (preg_match('/(up.browser|up.link|mmp|symbian|smartphone|midp|wap|phone|iphone|ipad|ipod|android|xoom)/i', strtolower($_SERVER['HTTP_USER_AGENT']))) {
             $mobile_browser++;
         }
-        if ((isset($_SERVER['HTTP_ACCEPT'])) and (strpos(
-                                                      strtolower($_SERVER['HTTP_ACCEPT']),
-                                                      'application/vnd.wap.xhtml+xml'
-                                                  ) !== false)) {
+        if ((isset($_SERVER['HTTP_ACCEPT'])) and (strpos(strtolower($_SERVER['HTTP_ACCEPT']), 'application/vnd.wap.xhtml+xml') !== false)) {
             $mobile_browser++;
         }
         if (isset($_SERVER['HTTP_X_WAP_PROFILE'])) {

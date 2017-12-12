@@ -52,10 +52,16 @@ if ( ! function_exists('web_url')) {
      * 根据配置项 http.rewrite判断
      * 没有开启伪静态时添加index.php入口文件
      *
+     * @param bool $hasRoot 包含入口文件
+     *
      * @return string
      */
-    function web_url()
+    function web_url($hasRoot = false)
     {
+        if ($hasRoot) {
+            return __ROOT__.'/index.php';
+        }
+
         return \houdunwang\request\Request::web();
     }
 }
