@@ -109,7 +109,6 @@ class Base
         $this->items['GLOBALS'] = $GLOBALS;
         $this->items['SESSION'] = Session::all();
         $this->items['COOKIE']  = Cookie::all();
-
         if (empty($_POST)) {
             $input = file_get_contents('php://input');
             if ($data = json_decode($input, true)) {
@@ -498,5 +497,27 @@ class Base
         $arr = parse_url($url);
 
         return isset($arr['host']) ? $arr['host'] : '';
+    }
+
+    /**
+     * 添加或移除$_GET参数并转为字符串
+     *
+     * @param string $name 变量名
+     * @param bool   $type
+     *
+     * @return string
+     */
+    public function getToStr($name = null, $value = null)
+    {
+        $arr = $_GET;
+        if ( ! is_null($name)) {
+            if (is_null($value)) {
+                $arr = Arr::getExtName($arr, [$name]);
+            } else {
+                $arr[$name] = $value;
+            }
+        }
+
+        return http_build_query($arr);
     }
 }
