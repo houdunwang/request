@@ -10,6 +10,8 @@
 
 namespace houdunwang\request\build;
 
+use houdunwang\validate\Validate;
+
 /**
  * 表单请求基础类
  * Class Request
@@ -46,7 +48,7 @@ abstract class FormRequest implements \ArrayAccess
     public function __construct()
     {
         if ($this->authorize() !== true) {
-            go(__WEB__.$this->home);
+            go(__WEB__ . $this->home);
         }
         $this->data = \Request::post();
         $this->validate();
